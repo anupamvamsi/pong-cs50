@@ -1,5 +1,9 @@
 -- https://github.com/Ulydev/push
+-- https://github.com/vrld/hump/blob/master/class.lua
 push = require('push')
+Class = require('class')
+
+require 'Paddle'
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
@@ -35,6 +39,9 @@ function love.load()
   player1Y = 15
   player2X = VIRTUAL_WIDTH - 25
   player2Y = VIRTUAL_HEIGHT - 35
+  -- paddles
+  player1 = Paddle(player1X, player1Y, PADDLE_W, PADDLE_H)
+  player2 = Paddle(player2X, player2Y, PADDLE_W, PADDLE_H)
 
   ballX = VIRTUAL_WIDTH / 2 - BALL_WH / 2
   ballY = VIRTUAL_HEIGHT / 2 - BALL_WH / 2
@@ -55,16 +62,23 @@ end
 
 function love.update(dt)
   if love.keyboard.isDown('w') then
-    player1Y = math.max(0, player1Y + -PADDLE_SPEED * dt)
+    player1.dy = -PADDLE_SPEED
   elseif love.keyboard.isDown('s') then
-    player1Y = math.min(VIRTUAL_HEIGHT - PADDLE_H, player1Y + PADDLE_SPEED * dt)
+    player1.dy = PADDLE_SPEED
+  else
+    player1.dy = 0
   end
 
   if love.keyboard.isDown('up') then
-    player2Y = math.max(0, player2Y + -PADDLE_SPEED * dt)
+    player2.dy = -PADDLE_SPEED
   elseif love.keyboard.isDown('down') then
-    player2Y = math.min(VIRTUAL_HEIGHT - PADDLE_H, player2Y + PADDLE_SPEED * dt)
+    player2.dy = PADDLE_SPEED
+  else
+    player2.dy = 0
   end
+
+  player1:update(dt)
+  player2:update(dt)
 end
 
 function love.draw()
@@ -81,9 +95,8 @@ function love.draw()
   printTextInCenter(player1Score, 40)
   printTextInCenter(player2Score, -40)
 
-  -- paddles
-  love.graphics.rectangle("fill", player1X, player1Y, PADDLE_W, PADDLE_H)
-  love.graphics.rectangle("fill", player2X, player2Y, PADDLE_W, PADDLE_H)
+  player1:draw()
+  player2:draw()
 
   -- ball
   love.graphics.rectangle("fill", ballX, ballY, BALL_WH, BALL_WH)
