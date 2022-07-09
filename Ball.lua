@@ -15,7 +15,7 @@ function Ball:update(dt)
 end
 
 function Ball:draw()
-  love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
+  love.graphics.rectangle("line", self.x, self.y, self.width, self.height)
 end
 
 function Ball:reset()
@@ -24,4 +24,18 @@ function Ball:reset()
 
   self.dx = (math.random(2) == 1) and 100 or -100
   self.dy = math.random(-200, 200)
+end
+
+function Ball:collided(paddle)
+  -- rightEdge (paddle), leftEdge (ball) OR leftEdge (paddle), rightEdge (ball)
+  if paddle.x + paddle.width < self.x or paddle.x > self.x + self.width then
+    return false
+  end
+
+  -- botEdge (paddle), topEdge (ball) OR topEdge (paddle), botEdge (ball)
+  if paddle.y + paddle.height < self.y or paddle.y > self.y + self.height then
+    return false
+  end
+
+  return true
 end
