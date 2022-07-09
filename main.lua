@@ -4,6 +4,7 @@ push = require('push')
 Class = require('class')
 
 require 'Paddle'
+require 'Ball'
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
@@ -23,6 +24,9 @@ BALL_WH = 4
 
 function love.load()
   love.graphics.setDefaultFilter('nearest', 'nearest')
+
+  -- random seed
+  math.randomseed(os.time())
 
   fontLarge = love.graphics.setNewFont('font.ttf', FONT_LARGE)
   fontMed = love.graphics.setNewFont('font.ttf', FONT_MED)
@@ -45,9 +49,12 @@ function love.load()
 
   ballX = VIRTUAL_WIDTH / 2 - BALL_WH / 2
   ballY = VIRTUAL_HEIGHT / 2 - BALL_WH / 2
+  ball = Ball(ballX, ballY, BALL_WH, BALL_WH)
 
   player1Score = 0
-  player2Score = 1
+  player2Score = 0
+
+  gameState = 'start'
 end
 
 function love.resize(w, h)
@@ -55,8 +62,15 @@ function love.resize(w, h)
 end
 
 function love.keypressed(key)
-  if (key == 'escape') then
+  if key == 'escape' then
     love.event.quit()
+  elseif key == 'enter' or key == 'return' then
+    if gameState == 'start' then
+      gameState = 'play'
+    else
+      gameState = 'start'
+      ball:reset()
+    end
   end
 end
 
@@ -75,6 +89,10 @@ function love.update(dt)
     player2.dy = PADDLE_SPEED
   else
     player2.dy = 0
+  end
+
+  if gameState == 'play' then
+    ball:update(dt)
   end
 
   player1:update(dt)
@@ -98,8 +116,8 @@ function love.draw()
   player1:draw()
   player2:draw()
 
-  -- ball
-  love.graphics.rectangle("fill", ballX, ballY, BALL_WH, BALL_WH)
+  ball:draw()
+
   push:apply('end')
 end
 
