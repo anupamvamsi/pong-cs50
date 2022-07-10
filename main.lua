@@ -22,6 +22,27 @@ PADDLE_SPEED = 200 -- pixels/sec
 
 BALL_WH = 4
 
+function loadGame()
+  -- paddles' X-Y coordinates
+  player1X = 15
+  player1Y = 15
+  player2X = VIRTUAL_WIDTH - 25
+  player2Y = VIRTUAL_HEIGHT - 35
+
+  -- paddles
+  player1 = Paddle(player1X, player1Y, PADDLE_W, PADDLE_H)
+  player2 = Paddle(player2X, player2Y, PADDLE_W, PADDLE_H)
+
+  -- ball
+  ballX = VIRTUAL_WIDTH / 2 - BALL_WH / 2
+  ballY = VIRTUAL_HEIGHT / 2 - BALL_WH / 2
+  ball = Ball(ballX, ballY, BALL_WH, BALL_WH)
+
+  -- initial scores
+  player1Score = 0
+  player2Score = 0
+end
+
 function love.load()
   love.graphics.setDefaultFilter('nearest', 'nearest')
 
@@ -41,25 +62,7 @@ function love.load()
     vsync = true
   })
 
-  -- paddles' X-Y coordinates
-  player1X = 15
-  player1Y = 15
-  player2X = VIRTUAL_WIDTH - 25
-  player2Y = VIRTUAL_HEIGHT - 35
-
-  -- paddles
-  player1 = Paddle(player1X, player1Y, PADDLE_W, PADDLE_H)
-  player2 = Paddle(player2X, player2Y, PADDLE_W, PADDLE_H)
-
-  -- ball
-  ballX = VIRTUAL_WIDTH / 2 - BALL_WH / 2
-  ballY = VIRTUAL_HEIGHT / 2 - BALL_WH / 2
-  ball = Ball(ballX, ballY, BALL_WH, BALL_WH)
-
-  -- initial scores
-  player1Score = 0
-  player2Score = 0
-
+  loadGame()
   gameState = 'start'
 end
 
@@ -141,17 +144,42 @@ function love.update(dt)
       ball.dy = -ball.dy
     end
 
-    -- increment score
+    -- increment score - player2 scores
     if ball.x + ball.width < 0 then
       player2Score = player2Score + 1
+      gameWinText = "Player 2 scored!"
       ball:reset()
+
+      -- player1 serves
+      servingPlayer = player1
+      gamePlayText = "Serving Player: Player 1"
+      ball.dx = 100
       gameState = 'start'
+
+      -- check winner and declare
+      if checkWinner(player2Score) then
+        gameFinalWinner = "PLAYER 2 WIN!"
+        gameState = 'end'
+      end
     end
 
+    -- player1 scores
     if ball.x > VIRTUAL_WIDTH then
       player1Score = player1Score + 1
+      gameWinText = "Player 1 scored!"
       ball:reset()
+
+      -- player2 serves
+      servingPlayer = player2
+      gamePlayText = "Serving Player: Player 2"
+      ball.dx = -100
       gameState = 'start'
+
+      -- check winner and declare
+      if checkWinner(player1Score) then
+        gameFinalWinner = "PLAYER 1 WIN!"
+        gameState = 'end'
+      end
     end
 
     ball:update(dt)
@@ -164,21 +192,51 @@ end
 function love.draw()
   push:apply('start')
 
-  -- fill background color
-  love.graphics.clear(123 / 255, 21 / 255, 14 / 255, 255)
+  if gameState == 'end' then
+    love.graphics.clear(12 / 255, 123 / 255, 14 / 255, 255)
+    love.graphics.setFont(fontLarge)
+    printTextInCenter(gameFinalWinner, nil, VIRTUAL_HEIGHT / 2 - FONT_LARGE / 2)
+    love.graphics.setFont(fontSmall)
+    printTextInCenter("Press 'ENTER' to replay!", nil, VIRTUAL_HEIGHT / 2 + FONT_LARGE)
 
-  local gameStartText = "Press 'ENTER' to start"
-  love.graphics.setFont(fontSmall)
-  printTextInCenter(gameStartText)
+    loadGame()
+  else
+    -- fill background color
+    love.graphics.clear(123 / 255, 21 / 255, 14 / 255, 255)
 
-  love.graphics.setFont(fontLarge)
-  printTextInCenter(player1Score, 40)
-  printTextInCenter(player2Score, -40)
+    love.graphics.setFont(fontSmall)
 
-  player1:draw()
-  player2:draw()
+    local gameStartText = ""
+    if player1Score == 0 and player2Score == 0 then
+      gameWinText = ""
+    end
+    gamePlayText = ""
 
-  ball:draw()
+    if gameState == 'start' then
+      gameStartText = "Press 'ENTER' to start"
+      printTextInCenter(gameStartText)
+      printTextInCenter(gameWinText, nil, 24)
+    end
+
+    if servingPlayer == nil then
+      gamePlayText = "Random serve!"
+    elseif servingPlayer == player1 then
+      gamePlayText = "Now serving: Player 1"
+    elseif servingPlayer == player2 then
+      gamePlayText = "Now serving: Player 2"
+    end
+
+    printTextInCenter(gamePlayText, nil, 64)
+
+    love.graphics.setFont(fontLarge)
+    printTextInCenter(player1Score, 40, 36)
+    printTextInCenter(player2Score, -40, 36)
+
+    player1:draw()
+    player2:draw()
+
+    ball:draw()
+  end
 
   push:apply('end')
 end
@@ -197,4 +255,10 @@ function printTextInCenter(text, width, height)
   local textH = height or font:getHeight()
 
   love.graphics.print(text, VIRTUAL_WIDTH / 2 - textW / 2, textH)
+end
+
+function checkWinner(playerScore)
+  if playerScore == 5 then
+    return true
+  end
 end
