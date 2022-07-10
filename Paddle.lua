@@ -17,5 +17,5 @@ function Paddle:update(dt)
 end
 
 function Paddle:draw()
-  love.graphics.rectangle("line", self.x, self.y, self.width, self.height)
+  love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
 end

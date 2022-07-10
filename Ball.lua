@@ -15,7 +15,7 @@ function Ball:update(dt)
 end
 
 function Ball:draw()
-  love.graphics.rectangle("line", self.x, self.y, self.width, self.height)
+  love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
 end
 
 function Ball:reset()
