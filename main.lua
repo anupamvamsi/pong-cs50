@@ -12,6 +12,7 @@ WINDOW_HEIGHT = 720
 VIRTUAL_WIDTH = 432
 VIRTUAL_HEIGHT = 243
 
+FONT_ELARGE = 48
 FONT_LARGE = 24
 FONT_MED = 16
 FONT_SMALL = 8
@@ -41,6 +42,8 @@ function loadGame()
   -- initial scores
   player1Score = 0
   player2Score = 0
+
+  servingPlayer = nil
 end
 
 function love.load()
@@ -50,6 +53,7 @@ function love.load()
   math.randomseed(os.time())
 
   -- font sizes in use
+  fontELarge = love.graphics.setNewFont('font.ttf', FONT_ELARGE)
   fontLarge = love.graphics.setNewFont('font.ttf', FONT_LARGE)
   fontMed = love.graphics.setNewFont('font.ttf', FONT_MED)
   fontSmall = love.graphics.setNewFont('font.ttf', FONT_SMALL)
@@ -76,6 +80,9 @@ function love.keypressed(key)
   if key == 'escape' then
     love.event.quit()
   elseif key == 'enter' or key == 'return' then
+    if gameState == 'end' then
+      loadGame()
+    end
     if gameState == 'start' then
       gameState = 'play'
     else
@@ -194,12 +201,16 @@ function love.draw()
 
   if gameState == 'end' then
     love.graphics.clear(12 / 255, 123 / 255, 14 / 255, 255)
+
+    love.graphics.setFont(fontELarge)
+    printTextInCenter(player1Score, 100, 48)
+    printTextInCenter('-', 0, 48)
+    printTextInCenter(player2Score, -100, 48)
+
     love.graphics.setFont(fontLarge)
     printTextInCenter(gameFinalWinner, nil, VIRTUAL_HEIGHT / 2 - FONT_LARGE / 2)
     love.graphics.setFont(fontSmall)
     printTextInCenter("Press 'ENTER' to replay!", nil, VIRTUAL_HEIGHT / 2 + FONT_LARGE)
-
-    loadGame()
   else
     -- fill background color
     love.graphics.clear(123 / 255, 21 / 255, 14 / 255, 255)
@@ -229,8 +240,9 @@ function love.draw()
     printTextInCenter(gamePlayText, nil, 64)
 
     love.graphics.setFont(fontLarge)
-    printTextInCenter(player1Score, 40, 36)
-    printTextInCenter(player2Score, -40, 36)
+    printTextInCenter(player1Score, 60, 36)
+    printTextInCenter('-', 0, 36)
+    printTextInCenter(player2Score, -60, 36)
 
     player1:draw()
     player2:draw()
@@ -258,7 +270,8 @@ function printTextInCenter(text, width, height)
 end
 
 function checkWinner(playerScore)
-  if playerScore == 5 then
+  if playerScore == 10
+  then
     return true
   end
 end
