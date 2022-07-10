@@ -28,39 +28,47 @@ function love.load()
   -- random seed
   math.randomseed(os.time())
 
+  -- font sizes in use
   fontLarge = love.graphics.setNewFont('font.ttf', FONT_LARGE)
   fontMed = love.graphics.setNewFont('font.ttf', FONT_MED)
   fontSmall = love.graphics.setNewFont('font.ttf', FONT_SMALL)
   love.window.setTitle('Pong!')
 
+  -- virtual screen dimensions
   push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
     fullscreen = false,
     resizable = true,
     vsync = true
   })
 
+  -- paddles' X-Y coordinates
   player1X = 15
   player1Y = 15
   player2X = VIRTUAL_WIDTH - 25
   player2Y = VIRTUAL_HEIGHT - 35
+
   -- paddles
   player1 = Paddle(player1X, player1Y, PADDLE_W, PADDLE_H)
   player2 = Paddle(player2X, player2Y, PADDLE_W, PADDLE_H)
 
+  -- ball
   ballX = VIRTUAL_WIDTH / 2 - BALL_WH / 2
   ballY = VIRTUAL_HEIGHT / 2 - BALL_WH / 2
   ball = Ball(ballX, ballY, BALL_WH, BALL_WH)
 
+  -- initial scores
   player1Score = 0
   player2Score = 0
 
   gameState = 'start'
 end
 
+-- enabling resizing
 function love.resize(w, h)
   push:resize(w, h)
 end
 
+-- exit and play state key presses
 function love.keypressed(key)
   if key == 'escape' then
     love.event.quit()
@@ -75,6 +83,7 @@ function love.keypressed(key)
 end
 
 function love.update(dt)
+  -- player1 (left paddle) movement
   if love.keyboard.isDown('w') then
     player1.dy = -PADDLE_SPEED
   elseif love.keyboard.isDown('s') then
@@ -83,6 +92,7 @@ function love.update(dt)
     player1.dy = 0
   end
 
+  -- player2 (left paddle) movement
   if love.keyboard.isDown('up') then
     player2.dy = -PADDLE_SPEED
   elseif love.keyboard.isDown('down') then
@@ -91,11 +101,15 @@ function love.update(dt)
     player2.dy = 0
   end
 
+  -- game play state PLAY
   if gameState == 'play' then
+    -- collision detection => change ball direction and slightly increase speed
+    -- ensure ball doesn't overlap / go into the paddle
     if ball:collided(player1) then
       ball.dx = -ball.dx * 1.03
       ball.x = player1.x + player1.width
 
+      -- change ball Y direction velocity randomly on collision
       if ball.dy < 0 then
         ball.dy = -math.random(50, 200)
       else
@@ -114,11 +128,14 @@ function love.update(dt)
       end
     end
 
+    -- detect collision with top edge of the screen,
+    -- reset ball position and deflect it
     if ball.y <= 0 then
       ball.y = 0
       ball.dy = -ball.dy
     end
 
+    -- detect collision with bottom edge and handle the ball
     if ball.y >= VIRTUAL_HEIGHT - ball.height then
       ball.y = VIRTUAL_HEIGHT - ball.height
       ball.dy = -ball.dy
@@ -134,10 +151,10 @@ end
 function love.draw()
   push:apply('start')
 
-  local gameStartText = "Press 'ENTER' to start"
-
+  -- fill background color
   love.graphics.clear(123 / 255, 21 / 255, 14 / 255, 255)
 
+  local gameStartText = "Press 'ENTER' to start"
   love.graphics.setFont(fontSmall)
   printTextInCenter(gameStartText)
 
