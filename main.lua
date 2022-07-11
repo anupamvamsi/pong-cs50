@@ -125,28 +125,11 @@ function love.update(dt)
     -- collision detection => change ball direction and slightly increase speed
     -- ensure ball doesn't overlap / go into the paddle
     if ball:collided(player1) then
-      sounds.paddleHit:play()
-      ball.dx = -ball.dx * 1.03
-      ball.x = player1.x + player1.width
-
-      -- change ball Y direction velocity randomly on collision
-      if ball.dy < 0 then
-        ball.dy = -math.random(50, 200)
-      else
-        ball.dy = math.random(50, 200)
-      end
+      postCollision(player1)
     end
 
     if ball:collided(player2) then
-      sounds.paddleHit:play()
-      ball.dx = -ball.dx * 1.03
-      ball.x = player2.x - ball.width
-
-      if ball.dy < 0 then
-        ball.dy = -math.random(50, 200)
-      else
-        ball.dy = math.random(50, 200)
-      end
+      postCollision(player2)
     end
 
     -- detect collision with top edge of the screen,
@@ -164,12 +147,12 @@ function love.update(dt)
       ball.dy = -ball.dy
     end
 
-    -- increment score - player2 scores
+    -- increment score
+    -- player2 scores
     if ball.x + ball.width < 0 then
       ball:reset()
       scoreIncreaseAndDetermineServer(player2, player1)
 
-      -- check winner and declare
       if checkWinner(player2Score) then
         gameFinalWinner = "PLAYER 2 WIN!"
         gameState = 'end'
@@ -181,7 +164,6 @@ function love.update(dt)
       ball:reset()
       scoreIncreaseAndDetermineServer(player1, player2)
 
-      -- check winner and declare
       if checkWinner(player1Score) then
         gameFinalWinner = "PLAYER 1 WIN!"
         gameState = 'end'
@@ -292,15 +274,32 @@ function scoreIncreaseAndDetermineServer(playerScored, playerLost)
 
   -- increase size, make it slower
   playerScored.height = playerScored.height + 3
-  playerScored.dy = playerScored.dy - playerScored.dy
+  -- playerScored.dy = playerScored.dy - playerScored.dy
 
   -- decrease size, make it faster
   playerLost.height = playerLost.height - 1
-  playerLost.dy = playerLost.dy + playerLost.dy
+  -- playerLost.dy = playerLost.dy + playerLost.dy
   sounds.paddleSize:play()
 
   -- playerLost serves
   servingPlayer = playerLost
   ball.dx = 100 * (math.pow(-1, playerScoredNum))
   gameState = 'serve'
+end
+
+function postCollision(player)
+  sounds.paddleHit:play()
+  ball.dx = -ball.dx * 1.03
+  if player == player1 then
+    ball.x = player1.x + player1.width
+  elseif player == player2 then
+    ball.x = player.x - ball.width
+  end
+
+  -- change ball Y direction velocity randomly on collision
+  if ball.dy < 0 then
+    ball.dy = -math.random(50, 200)
+  else
+    ball.dy = math.random(50, 200)
+  end
 end
