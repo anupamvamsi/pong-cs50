@@ -92,6 +92,8 @@ function love.keypressed(key)
     end
     if gameState == 'start' then
       gameState = 'play'
+    elseif gameState == 'serve' then
+      gameState = 'play'
     else
       gameState = 'start'
       ball:reset()
@@ -164,28 +166,8 @@ function love.update(dt)
 
     -- increment score - player2 scores
     if ball.x + ball.width < 0 then
-      sounds.ballDies:play()
-      player2Score = player2Score + 1
-      gameWinText = "Player 2 scored!"
-
-      love.timer.sleep(1.7)
-
-      -- increase size, make it slower
-      player2.height = player2.height + 3
-      player2.dy = player2.dy - player2.dy / 3
-
-      -- decrease size, make it faster
-      player1.height = player1.height - 1
-      player1.dy = player1.dy + player1.dy / 3
-      sounds.paddleSize:play()
-
       ball:reset()
-
-      -- player1 serves
-      servingPlayer = player1
-      gamePlayText = "Serving Player: Player 1"
-      ball.dx = 100
-      gameState = 'start'
+      scoreIncreaseAndDetermineServer(player2, player1)
 
       -- check winner and declare
       if checkWinner(player2Score) then
@@ -196,28 +178,8 @@ function love.update(dt)
 
     -- player1 scores
     if ball.x > VIRTUAL_WIDTH then
-      sounds.ballDies:play()
-      player1Score = player1Score + 1
-      gameWinText = "Player 1 scored!"
-
-      love.timer.sleep(1.7)
-
-      -- increase size, make it slower
-      player1.height = player1.height + 3
-      player1.dy = player1.dy - player1.dy / 3
-
-      -- decrease size, make it faster
-      player2.height = player2.height - 1
-      player2.dy = player2.dy + player2.dy / 3
-      sounds.paddleSize:play()
-
       ball:reset()
-
-      -- player2 serves
-      servingPlayer = player2
-      gamePlayText = "Serving Player: Player 2"
-      ball.dx = -100
-      gameState = 'start'
+      scoreIncreaseAndDetermineServer(player1, player2)
 
       -- check winner and declare
       if checkWinner(player1Score) then
@@ -260,7 +222,7 @@ function love.draw()
     end
     gamePlayText = ""
 
-    if gameState == 'start' then
+    if gameState == 'start' or gameState == 'serve' then
       gameStartText = "Press 'ENTER' to start"
       printTextInCenter(gameStartText)
       printTextInCenter(gameWinText, nil, 24)
@@ -306,9 +268,39 @@ function printTextInCenter(text, width, height)
   love.graphics.print(text, VIRTUAL_WIDTH / 2 - textW / 2, textH)
 end
 
-function checkWinner(playerScore)
-  if playerScore == 10
+function checkWinner(playerCurrentScore)
+  if playerCurrentScore == 10
   then
     return true
   end
+end
+
+function scoreIncreaseAndDetermineServer(playerScored, playerLost)
+  playerScoredNum = 0 -- the player who scored, i.e., 1 or 2
+  if playerScored == player1 then
+    player1Score = player1Score + 1
+    playerScoredNum = 1
+  else
+    player2Score = player2Score + 1
+    playerScoredNum = 2
+  end
+
+  gameWinText = "Player " .. playerScoredNum .. " scored!"
+  sounds.ballDies:play()
+
+  love.timer.sleep(1.7)
+
+  -- increase size, make it slower
+  playerScored.height = playerScored.height + 3
+  playerScored.dy = playerScored.dy - playerScored.dy
+
+  -- decrease size, make it faster
+  playerLost.height = playerLost.height - 1
+  playerLost.dy = playerLost.dy + playerLost.dy
+  sounds.paddleSize:play()
+
+  -- playerLost serves
+  servingPlayer = playerLost
+  ball.dx = 100 * (math.pow(-1, playerScoredNum))
+  gameState = 'serve'
 end
