@@ -66,6 +66,13 @@ function love.load()
     vsync = true
   })
 
+  -- sounds
+  sounds = {}
+  sounds.ballDies = love.audio.newSource("sounds/ball_dies.wav", "static")
+  sounds.paddleSize = love.audio.newSource("sounds/paddle_shrink.wav", "static")
+  sounds.paddleHit = love.audio.newSource("sounds/paddle_hit.wav", "static")
+  sounds.wallHit = love.audio.newSource("sounds/wall_hit.wav", "static")
+
   loadGame()
   gameState = 'start'
 end
@@ -116,6 +123,7 @@ function love.update(dt)
     -- collision detection => change ball direction and slightly increase speed
     -- ensure ball doesn't overlap / go into the paddle
     if ball:collided(player1) then
+      sounds.paddleHit:play()
       ball.dx = -ball.dx * 1.03
       ball.x = player1.x + player1.width
 
@@ -128,6 +136,7 @@ function love.update(dt)
     end
 
     if ball:collided(player2) then
+      sounds.paddleHit:play()
       ball.dx = -ball.dx * 1.03
       ball.x = player2.x - ball.width
 
@@ -141,20 +150,35 @@ function love.update(dt)
     -- detect collision with top edge of the screen,
     -- reset ball position and deflect it
     if ball.y <= 0 then
+      sounds.wallHit:play()
       ball.y = 0
       ball.dy = -ball.dy
     end
 
     -- detect collision with bottom edge and handle the ball
     if ball.y >= VIRTUAL_HEIGHT - ball.height then
+      sounds.wallHit:play()
       ball.y = VIRTUAL_HEIGHT - ball.height
       ball.dy = -ball.dy
     end
 
     -- increment score - player2 scores
     if ball.x + ball.width < 0 then
+      sounds.ballDies:play()
       player2Score = player2Score + 1
       gameWinText = "Player 2 scored!"
+
+      love.timer.sleep(1.7)
+
+      -- increase size, make it slower
+      player2.height = player2.height + 3
+      player2.dy = player2.dy - player2.dy / 3
+
+      -- decrease size, make it faster
+      player1.height = player1.height - 1
+      player1.dy = player1.dy + player1.dy / 3
+      sounds.paddleSize:play()
+
       ball:reset()
 
       -- player1 serves
@@ -172,8 +196,21 @@ function love.update(dt)
 
     -- player1 scores
     if ball.x > VIRTUAL_WIDTH then
+      sounds.ballDies:play()
       player1Score = player1Score + 1
       gameWinText = "Player 1 scored!"
+
+      love.timer.sleep(1.7)
+
+      -- increase size, make it slower
+      player1.height = player1.height + 3
+      player1.dy = player1.dy - player1.dy / 3
+
+      -- decrease size, make it faster
+      player2.height = player2.height - 1
+      player2.dy = player2.dy + player2.dy / 3
+      sounds.paddleSize:play()
+
       ball:reset()
 
       -- player2 serves
