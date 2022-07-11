@@ -23,6 +23,8 @@ PADDLE_SPEED = 200 -- pixels/sec
 
 BALL_WH = 4
 
+WIN_SCORE = 2
+
 function loadGame()
   -- paddles' X-Y coordinates
   player1X = 15
@@ -75,6 +77,7 @@ function love.load()
   sounds.paddleHit = love.audio.newSource("sounds/paddle_hit.wav", "static")
   sounds.wallHit = love.audio.newSource("sounds/wall_hit.wav", "static")
   sounds.loadGame = love.audio.newSource("sounds/load_game1.wav", "static")
+  sounds.winGame = love.audio.newSource("sounds/winner4.wav", "static")
 
   loadGame()
   gameState = 'start'
@@ -106,22 +109,10 @@ end
 
 function love.update(dt)
   -- player1 (left paddle) movement
-  if love.keyboard.isDown('w') then
-    player1.dy = -PADDLE_SPEED
-  elseif love.keyboard.isDown('s') then
-    player1.dy = PADDLE_SPEED
-  else
-    player1.dy = 0
-  end
+  playerMovement(player1, 'w', 's')
 
   -- player2 (left paddle) movement
-  if love.keyboard.isDown('up') then
-    player2.dy = -PADDLE_SPEED
-  elseif love.keyboard.isDown('down') then
-    player2.dy = PADDLE_SPEED
-  else
-    player2.dy = 0
-  end
+  playerMovement(player2, 'up', 'down')
 
   -- game play state PLAY
   if gameState == 'play' then
@@ -195,6 +186,8 @@ function love.draw()
     printTextInCenter(gameFinalWinner, nil, VIRTUAL_HEIGHT / 2 - FONT_LARGE / 2)
     love.graphics.setFont(fontSmall)
     printTextInCenter("Press 'ENTER' to replay!", nil, VIRTUAL_HEIGHT / 2 + FONT_LARGE)
+
+    sounds.winGame:play()
   else
     -- fill background color
     love.graphics.clear(123 / 255, 21 / 255, 14 / 255, 255)
@@ -254,7 +247,7 @@ function printTextInCenter(text, width, height)
 end
 
 function checkWinner(playerCurrentScore)
-  if playerCurrentScore == 10
+  if playerCurrentScore == WIN_SCORE
   then
     return true
   end
@@ -282,7 +275,9 @@ function scoreIncreaseAndDetermineServer(playerScored, playerLost)
   -- decrease size, make it faster
   playerLost.height = playerLost.height - 1
   -- playerLost.dy = playerLost.dy + playerLost.dy
-  sounds.paddleSize:play()
+  if not (player1Score == WIN_SCORE or player2Score == WIN_SCORE) then
+    sounds.paddleSize:play()
+  end
 
   -- playerLost serves
   servingPlayer = playerLost
@@ -304,5 +299,15 @@ function postCollision(player)
     ball.dy = -math.random(50, 200)
   else
     ball.dy = math.random(50, 200)
+  end
+end
+
+function playerMovement(player, upKey, downKey)
+  if love.keyboard.isDown(upKey) then
+    player.dy = -PADDLE_SPEED
+  elseif love.keyboard.isDown(downKey) then
+    player.dy = PADDLE_SPEED
+  else
+    player.dy = 0
   end
 end
