@@ -44,6 +44,8 @@ function loadGame()
   player2Score = 0
 
   servingPlayer = nil
+
+  sounds.loadGame:play()
 end
 
 function love.load()
@@ -72,6 +74,7 @@ function love.load()
   sounds.paddleSize = love.audio.newSource("sounds/paddle_shrink.wav", "static")
   sounds.paddleHit = love.audio.newSource("sounds/paddle_hit.wav", "static")
   sounds.wallHit = love.audio.newSource("sounds/wall_hit.wav", "static")
+  sounds.loadGame = love.audio.newSource("sounds/load_game1.wav", "static")
 
   loadGame()
   gameState = 'start'
