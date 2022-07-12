@@ -46,6 +46,7 @@ function loadGame()
   player2Score = 0
 
   servingPlayer = nil
+  winGameCount = 0
 
   sounds.loadGame:play()
 end
@@ -187,7 +188,10 @@ function love.draw()
     love.graphics.setFont(fontSmall)
     printTextInCenter("Press 'ENTER' to replay!", nil, VIRTUAL_HEIGHT / 2 + FONT_LARGE)
 
-    sounds.winGame:play()
+    if winGameCount < 1 then
+      sounds.winGame:play()
+      winGameCount = winGameCount + 1
+    end
   else
     -- fill background color
     love.graphics.clear(123 / 255, 21 / 255, 14 / 255, 255)
