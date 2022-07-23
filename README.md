@@ -13,12 +13,16 @@ Most of the code is based off of the code explained during the course. However, 
 - Replayability
 
 ## Want to play it?
+(I could probably figure out a way to just let you download an executable, but for the time being... sorry and thanks!)
 ### You will need to: 
 - Download [LÖVE](https://love2d.org/) (I used LÖVE 11.4 to make this) 
 - Clone the repository
 - Open a terminal while inside the root folder of the repository ("path-to-repository/pong-cs50/")
 - Once inside the `pong-cs50` folder, in the terminal, just run, `love .`
 - Or if you have the path to your cloned repository copied and available, just open a terminal from anywhere and run `love path-to-your-cloned-repo` (ex: `love "C:/Cloned Repos/pong-cs50"`)
+The LÖVE executable just needs to find and be able to execute the `main.lua` file.
+
+### Got no LÖVE?
 - If `love` does not run, make sure you add the location of the `love.exe` application (the place where LÖVE's installed files are located) into your machine's `PATH` variable. 
 - If you don't want do that, then in the terminal, enter the path to your LÖVE executable and then the path to the cloned repository. Press Enter. 
 `"C:/Program Files/LOVE2D/love.exe" "C:/Cloned Repos/pong-cs50"`.
